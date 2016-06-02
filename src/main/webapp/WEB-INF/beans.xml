@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:cxf="http://cxf.apache.org/core"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.1.xsd">
+
+
+	<import resource="classpath:META-INF/cxf/cxf.xml" />
+
+	<util:properties id="config" location="classpath:conf/config.properties"></util:properties>
+
+	<context:component-scan base-package="cn.zno" />
+	
+	<bean class="cn.zno.common.context.GServletContext"></bean>
+
+
+	<!-- /* -->
+	<!-- * resource -->
+	<!-- * / -->
+	<bean id="swaggerResource" class="io.swagger.jaxrs.listing.ApiListingResource" />
+
+	<!-- /* -->
+	<!-- * provider -->
+	<!-- * / -->
+	<bean id="swaggerWriter" class="io.swagger.jaxrs.listing.SwaggerSerializers" />
+	<bean id="exceptionMapper" class="cn.zno.resource.GExceptionMapper" />
+	<bean id="jaxbProvider" class="org.apache.cxf.jaxrs.provider.JAXBElementProvider" />
+	<bean id="jsonProvider" class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+
+	<!-- /* -->
+	<!-- * interceptor -->
+	<!-- * / -->
+<!-- 	<bean id="inInterceptors" class="org.apache.cxf.interceptor.LoggingInInterceptor"></bean> -->
+<!-- 	<bean id="outInterceptors" class="org.apache.cxf.interceptor.LoggingOutInterceptor"></bean> -->
+
+	<!-- SERVICE -->
+	<jaxrs:server id="services" address="/">
+		<jaxrs:serviceBeans>
+			<bean class="cn.zno.resource.UserResource" />
+			<ref bean="swaggerResource" />
+		</jaxrs:serviceBeans>
+		<jaxrs:providers>
+			<ref bean="jsonProvider" />
+			<ref bean="jaxbProvider" />
+			<ref bean="swaggerWriter" />
+			<ref bean="exceptionMapper" />
+		</jaxrs:providers>
+		<jaxrs:languageMappings>
+			<entry key="en" value="en-gb" />
+		</jaxrs:languageMappings>
+	</jaxrs:server>
+
+	<cxf:bus>
+		<cxf:features>
+			<cxf:logging />
+		</cxf:features>
+	</cxf:bus>
+
+
+	<bean id="swaggerConfig" class="io.swagger.jaxrs.config.BeanConfig">
+		<property name="resourcePackage" value="cn.zno.resource" />
+		<property name="version" value="1.0.0" />
+		<property name="host" value="#{config['swagger.path']}" />
+		<property name="basePath" value="/api" />
+		<property name="title" value="Swagger Petstore" />
+		<property name="description" value="This is a app." />
+		<property name="contact" value="apiteam@swagger.io" />
+		<property name="license" value="Apache 2.0" />
+		<property name="licenseUrl"
+			value="http://www.apache.org/licenses/LICENSE-2.0.html" />
+		<!-- <property name="filterClass" value="ApiAuthorizationFilterImpl"/> -->
+		<property name="scan" value="true" />
+	</bean>
+
+</beans>
